@@ -1,166 +1,288 @@
 # Enterprise AI Customer Intelligence Platform
 
-### AI-Driven Churn Prediction, Explainability & Decision Support
----
+> Enterprise-grade AI platform for customer intelligence, churn prediction, explainable AI, and agentic decision support.
+
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-## Project Overview
+---
 
-This platform combines traditional ML, large language models, and agentic AI to deliver actionable customer intelligence at scale. It processes customer interaction data through feature engineering pipelines, serves predictions via REST APIs, and provides natural-language insights through a LangGraph-powered agent — all accessible from a React dashboard.
+# Project Overview
+
+The Enterprise AI Customer Intelligence Platform is an end-to-end enterprise analytics platform designed for internal business, marketing, and risk teams.
+
+It combines traditional Machine Learning, Explainable AI, and Agentic AI into a single production-style application capable of:
+
+- Customer Segmentation (RFM)
+- Customer Lifetime Value Prediction
+- Churn Prediction using XGBoost
+- SHAP Explainability
+- Next Best Action Recommendation
+- AI-powered Business Assistant using LangGraph + RAG
+- Interactive Analytics Dashboard
+- Model Monitoring & Drift Detection
 
 ---
 
-## High-Level Architecture
+# Why This Project?
 
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────────┐
-│   React UI   │────▶│  FastAPI      │────▶│  PostgreSQL      │
-│  (Dashboard) │     │  (REST API)   │     │  (Feature Store) │
-└──────────────┘     └──────┬───────┘     └──────────────────┘
-                            │
-                    ┌───────┴────────┐
-                    │                │
-              ┌─────▼─────┐   ┌─────▼──────┐
-              │   Redis    │   │  RabbitMQ   │
-              │  (Cache)   │   │  (Queue)    │
-              └────────────┘   └─────┬──────┘
-                                     │
-                              ┌──────▼──────┐
-                              │   Workers    │
-                              │  (Celery)    │
-                              └──────┬──────┘
-                                     │
-                         ┌───────────┴───────────┐
-                         │                       │
-                   ┌─────▼──────┐         ┌──────▼──────┐
-                   │  ML Models │         │  LangGraph  │
-                   │ (sklearn)  │         │   Agent     │
-                   └────────────┘         └─────────────┘
+Most churn prediction projects stop after training a machine learning model.
+
+Real enterprise systems require much more.
+
+This project demonstrates how predictive models are integrated into scalable software systems with feature engineering pipelines, model serving APIs, caching, asynchronous workers, explainability, agentic AI, and production deployment.
+
+The goal is to simulate how customer intelligence platforms are built inside organizations such as:
+
+- American Express
+- JPMorgan Chase
+- Citi
+- Fractal Analytics
+- EXL
+- ZS Associates
+
+while also showcasing software engineering skills expected at companies like:
+
+- Google
+- Amazon
+- Microsoft
+- LinkedIn
+- Zomato
+
+---
+
+# Key Features
+
+### Data Engineering
+
+- Customer & Transaction Data Ingestion
+- Feature Engineering Pipeline
+- PySpark Batch Processing
+- Feature Store
+
+### Machine Learning
+
+- RFM Segmentation
+- Customer Lifetime Value Prediction
+- Churn Prediction (XGBoost)
+- SHAP Explainability
+- Model Evaluation
+- Drift Detection
+
+### Recommendation Engine
+
+- Next Best Action Prediction
+- A/B Testing Framework
+
+### Backend
+
+- FastAPI
+- PostgreSQL
+- Redis
+- RabbitMQ
+- JWT Authentication
+
+### Agentic AI
+
+- LangChain
+- LangGraph
+- Tool Calling
+- Retrieval Augmented Generation (RAG)
+- Conversation Memory
+
+### Frontend
+
+- React
+- TypeScript
+- Explainability Dashboard
+- Analytics Dashboard
+- AI Chat Assistant
+
+### Deployment
+
+- Docker
+- AWS
+- Logging
+- Monitoring
+- CI/CD
+
+---
+
+# High-Level Architecture
+
+```text
+React Dashboard
+       │
+       ▼
+FastAPI Backend
+       │
+ ┌─────┴─────────────┐
+ │                   │
+ ▼                   ▼
+PostgreSQL        Redis
+ │
+ ▼
+RabbitMQ
+ │
+ ▼
+Workers
+ │
+ ▼
+ML Models (XGBoost)
+ │
+ ▼
+SHAP Explainability
+ │
+ ▼
+LangGraph Agent
+ │
+ ▼
+RAG Knowledge Base
 ```
 
 ---
 
-## Tech Stack
+# Technology Stack
 
-| Layer           | Technology                       |
-|-----------------|----------------------------------|
-| Frontend        | React, Vite, TypeScript          |
-| Backend API     | FastAPI, Pydantic, SQLAlchemy    |
-| Database        | PostgreSQL 16                    |
-| Cache           | Redis 7                          |
-| Message Queue   | RabbitMQ 3.13                    |
-| ML              | scikit-learn, pandas, NumPy      |
-| LLM / Agent     | OpenAI, LangChain, LangGraph    |
-| Containerization| Docker, Docker Compose           |
-| Language        | Python 3.11, TypeScript 5.6      |
+| Layer | Technologies |
+|---------|----------------------------|
+| Frontend | React, Vite, TypeScript |
+| Backend | FastAPI, SQLAlchemy |
+| Database | PostgreSQL |
+| Cache | Redis |
+| Queue | RabbitMQ |
+| ML | XGBoost, SHAP, scikit-learn |
+| AI | LangChain, LangGraph, OpenAI |
+| Vector DB | pgvector |
+| Data Engineering | PySpark |
+| Deployment | Docker, AWS |
 
 ---
 
-## Folder Structure
+# Folder Structure
 
-```
-Enterprise-AI-Customer-Intelligence-Platform/
-├── backend/            # FastAPI application, config, models, routes
-├── frontend/           # React + Vite + TypeScript dashboard
-├── ml/                 # ML training, evaluation, model artifacts
-├── data_pipeline/      # ETL scripts, feature engineering
-├── agent/              # LangChain / LangGraph agentic workflows
-├── workers/            # Background task workers (Celery)
-├── infra/              # Dockerfiles, IaC, CI/CD configs
-├── tests/              # All test suites (unit, integration, e2e)
-├── docs/               # Architecture docs, roadmap, learning guides
-├── docker-compose.yml  # Local dev services (Postgres, Redis, RabbitMQ)
-├── pyproject.toml      # Python tooling config (ruff, mypy, pytest)
-├── .env.example        # Environment variable template
-├── .editorconfig       # Cross-editor formatting rules
-├── .gitignore          # Ignore rules for all project technologies
-└── LICENSE             # MIT License
+```text
+backend/
+frontend/
+ml/
+data_pipeline/
+agent/
+workers/
+infra/
+tests/
+docs/
 ```
 
 ---
 
-## Local Setup
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 20+ & npm
-- Docker & Docker Compose
-
-### 1. Clone & configure environment
+# Local Setup
 
 ```bash
-git clone https://github.com/Shiva-Preetham/Enterprise-AI-Customer-Intelligence-Platform.git
+git clone https://github.com/Shiva-Preetham/Enterprise-AI-Customer-Intelligence-Platform
+
 cd Enterprise-AI-Customer-Intelligence-Platform
+
 cp .env.example .env
-# Edit .env with your local values
-```
 
-### 2. Start infrastructure services
-
-```bash
 docker compose up -d
 ```
 
-This starts PostgreSQL, Redis, and RabbitMQ.
-
-### 3. Backend setup
+Backend
 
 ```bash
 cd backend
+
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
 pip install -r requirements.txt
 ```
 
-### 4. Frontend setup
+Frontend
 
 ```bash
 cd frontend
+
 npm install
+
 npm run dev
 ```
 
 ---
 
-## Sprint Progress
+# Sprint Progress
 
-| Sprint | Description                        | Status       |
-|--------|------------------------------------|--------------|
-| 0      | Project Foundation                 | ✅ Complete   |
-| 1      | Database & Feature Store           | 🔲 Planned   |
-| 2      | Feature Engineering + ML           | 🔲 Planned   |
-| 3      | FastAPI                            | 🔲 Planned   |
-| 4      | Redis Caching                      | 🔲 Planned   |
-| 5      | RabbitMQ + Workers                 | 🔲 Planned   |
-| 6      | LangChain + LangGraph              | 🔲 Planned   |
-| 7      | RAG + Agentic AI                   | 🔲 Planned   |
-| 8      | React Dashboard                    | 🔲 Planned   |
-| 9      | Docker + AWS Deployment            | 🔲 Planned   |
-| 10     | Monitoring + MLOps                 | 🔲 Planned   |
-
----
-
-## High-Level Roadmap
-
-**Phase 1 — Foundation (Sprint 0–1)**
-Project structure, database schema, feature store.
-
-**Phase 2 — Intelligence (Sprint 2–5)**
-ML pipelines, FastAPI, caching, async task processing.
-
-**Phase 3 — AI & Agents (Sprint 6–7)**
-LLM integration, agentic RAG workflows.
-
-**Phase 4 — Delivery (Sprint 8–10)**
-Dashboard UI, containerized deployment, monitoring.
+| Sprint | Status |
+|---------|--------|
+| Sprint 0 | ✅ Completed |
+| Sprint 1 | ⏳ Database & Feature Store |
+| Sprint 2 | ⏳ ML Pipeline |
+| Sprint 3 | ⏳ FastAPI |
+| Sprint 4 | ⏳ Redis |
+| Sprint 5 | ⏳ RabbitMQ |
+| Sprint 6 | ⏳ LangGraph |
+| Sprint 7 | ⏳ RAG |
+| Sprint 8 | ⏳ React Dashboard |
+| Sprint 9 | ⏳ AWS Deployment |
+| Sprint 10 | ⏳ Monitoring & MLOps |
 
 ---
 
-## License
+# Documentation
 
-This project is licensed under the MIT License. See [LICENSE](./LICENSE).
+Detailed architecture documentation is available inside the `docs/` directory.
+
+- ARCHITECTURE.md
+- ROADMAP.md
+- LEARNING_GUIDE.md
+- SPRINT_0_NOTES.md
+
+Future documentation will include:
+
+- Database Design
+- API Specification
+- ML Pipeline
+- Agent Architecture
+- Deployment Guide
+- Security Guide
+- Interview Guide
+
+---
+
+# Roadmap
+
+**Phase 1 — Foundation**
+
+- Project Setup
+- Database
+- Feature Store
+
+**Phase 2 — Intelligence**
+
+- Machine Learning
+- Explainability
+- FastAPI
+- Redis
+- RabbitMQ
+
+**Phase 3 — Agentic AI**
+
+- LangGraph
+- RAG
+- Tool Calling
+
+**Phase 4 — Production**
+
+- React Dashboard
+- Docker
+- AWS
+- Monitoring
+- MLOps
+
+---
+
+# License
+
+Licensed under the MIT License.
