@@ -217,7 +217,7 @@ npm run dev
 | Sprint | Status |
 |---------|--------|
 | Sprint 0 | ✅ Completed |
-| Sprint 1 | ⏳ Database & Feature Store |
+| Sprint 1 | 🔄 Database Foundation (In Progress) |
 | Sprint 2 | ⏳ ML Pipeline |
 | Sprint 3 | ⏳ FastAPI |
 | Sprint 4 | ⏳ Redis |
@@ -238,6 +238,7 @@ Detailed architecture documentation is available inside the `docs/` directory.
 - ROADMAP.md
 - LEARNING_GUIDE.md
 - SPRINT_0_NOTES.md
+- SPRINT_1_NOTES.md
 
 Future documentation will include:
 

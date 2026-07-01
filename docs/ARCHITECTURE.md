@@ -6,7 +6,19 @@
 
 ## System Context
 
-*To be documented in Sprint 1 as components are implemented.*
+### Configuration Layer (Sprint 1 — Milestone 1)
+
+The platform uses a centralized configuration system built on `pydantic-settings`:
+
+```
+.env file → Environment Variables → Pydantic Settings → Application Code
+```
+
+- **Single source of truth**: All services read from `backend.config.settings`
+- **Type-safe**: Invalid values (e.g. `DATABASE_PORT=abc`) fail at startup
+- **Immutable**: `frozen=True` prevents runtime mutation
+- **Computed URLs**: Database, Redis, and RabbitMQ URLs are derived from parts — no duplication
+- **DI-ready**: `get_settings()` factory supports dependency injection and test mocking
 
 ---
 

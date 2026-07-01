@@ -11,7 +11,7 @@ Each sprint documents what was built, why, and the engineering reasoning behind 
 | Sprint | Topic                              | Notes                                           |
 |--------|------------------------------------|-------------------------------------------------|
 | 0      | Project Foundation                 | [SPRINT_0_NOTES.md](./SPRINT_0_NOTES.md)        |
-| 1      | Database & Feature Store           | *Sprint 1 notes — coming soon*                  |
+| 1      | Database Foundation               | [SPRINT_1_NOTES.md](./SPRINT_1_NOTES.md)        |
 | 2      | Feature Engineering + ML           | *Sprint 2 notes — coming soon*                  |
 | 3      | FastAPI                            | *Sprint 3 notes — coming soon*                  |
 | 4      | Redis Caching                      | *Sprint 4 notes — coming soon*                  |
