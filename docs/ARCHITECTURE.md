@@ -67,6 +67,34 @@ PostgreSQL
                  └──────────┘   └─────────┘
 ```
 
+### Data Ingestion Framework (Sprint 1 — Milestone 5)
+
+The data ingestion framework loads raw CSV files into the database while maintaining referential integrity.
+
+```
+CSV Files (data/raw/)
+      │
+      ▼
+  Pandas (Validation & Cleaning)
+      │
+      ▼
+  Deduplication (CSV + Database levels)
+      │
+      ▼
+  SQLAlchemy Core (Bulk Insert)
+```
+
+- **Topological Sort**: Tables are ingested in dependency order (Customers → Orders → OrderItems) to avoid Foreign Key violations.
+- **Idempotent**: Pipeline checks for existing primary keys before insertion, allowing safe reruns.
+
+### Centralized Logging (Sprint 1 — Milestone 6)
+
+The platform uses `structlog` for structured, machine-readable logging.
+
+- **Development**: Renders colored console output for human readability.
+- **Production**: Renders JSON for log aggregators (ELK, Datadog).
+- **Integration**: Standard library logs (SQLAlchemy, Uvicorn) are intercepted and routed through structlog to ensure uniform formatting.
+
 ---
 
 ## Data Flow
@@ -90,6 +118,9 @@ PostgreSQL
 | ORM                    | SQLAlchemy 2.x | Async-native, type-safe Mapped columns          |
 | Async DB Driver        | asyncpg        | Native async PostgreSQL, fastest Python driver  |
 | Sync DB Driver         | psycopg2       | Required for Alembic (synchronous migrations)   |
+| Migrations             | Alembic        | SQLAlchemy-native schema versioning             |
+| Data Ingestion         | Pandas         | Fast CSV parsing, vectorized cleaning           |
+| Structured Logging     | structlog      | JSON output for production, colored for dev     |
 
 ---
 

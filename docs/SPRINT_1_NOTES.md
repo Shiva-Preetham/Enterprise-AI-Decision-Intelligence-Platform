@@ -165,14 +165,98 @@ The raw schema is in **3NF** (Third Normal Form):
 | String PKs instead of integer surrogates | Preserves lineage, costs more storage | Add surrogate `id SERIAL` columns |
 | No soft deletes | Raw data is immutable (insert-only) | Add `deleted_at` for mutable tables |
 
-### Milestone 4 — Alembic Migrations
+### Milestone 4 — Alembic Migrations ✅
 
-*Pending*
+**What was built:**
 
-### Milestone 5 — Data Ingestion
+| File | Purpose |
+|------|---------|
+| [alembic.ini](../alembic.ini) | Basic Alembic configuration. The DB URL here is overridden at runtime. |
+| [alembic/env.py](../alembic/env.py) | Configures Alembic to read `backend.config.settings` and `Base.metadata`. |
+| [alembic/script.py.mako](../alembic/script.py.mako) | Template for generated migrations. |
 
-*Pending*
+**Why it exists:**
 
-### Milestone 6 — Logging
+Database schemas evolve. Without a migration tool, schema changes must be applied manually across all environments (dev, staging, prod), leading to inconsistencies and downtime. Alembic tracks schema versions and provides a way to upgrade and downgrade the database programmatically.
 
-*Pending*
+**Why this design was chosen:**
+
+| Decision | Rationale |
+|----------|-----------|
+| Sync engine for Alembic | Alembic's migration runner does not support `asyncpg`. We use a separate `psycopg2` engine just for migrations. |
+| Auto-schema creation | `env.py` runs `CREATE SCHEMA IF NOT EXISTS` for all our schemas before applying migrations. This prevents errors when a migration tries to create a table in a non-existent schema. |
+| Importing all models in `env.py` | Alembic compares `Base.metadata` to the live database. If models aren't imported, they aren't registered with `Base`, and Alembic will think the tables should be dropped. |
+| Offline mode support | `env.py` supports `--sql` generation. Required for enterprise deployments where DBAs must review SQL before it runs. |
+
+**Common mistakes:**
+
+| Mistake | Consequence |
+|---------|-------------|
+| Forgetting to import models | `alembic revision --autogenerate` drops all your tables. |
+| Using asyncpg in alembic.ini | Alembic crashes with a `MissingGreenlet` error. |
+
+---
+
+### Milestone 5 — Data Ingestion Framework ✅
+
+**What was built:**
+
+A modular, dependency-ordered ingestion pipeline in `data_pipeline/ingestion/`.
+
+| Component | Purpose |
+|-----------|---------|
+| [base.py](../data_pipeline/ingestion/base.py) | `BaseIngester` class handling file validation, CSV reading, duplicate removal, DB collision checks, and bulk inserts. |
+| Entity Loaders | Subclasses (e.g., `customers.py`, `orders.py`) defining required columns and custom type casting (like converting strings to datetimes or handling empty strings as NULLs). |
+| [loader.py](../data_pipeline/ingestion/loader.py) | Master script executing ingesters in topological order. |
+
+**Why it exists:**
+
+Raw data from CSVs is messy and has constraints (Foreign Keys). If we ingest `orders` before `customers`, the database will reject the inserts. A modular ingestion framework ensures data is validated, cleaned, and inserted in the correct order, with proper error handling and logging.
+
+**Why this design was chosen:**
+
+| Decision | Rationale |
+|----------|-----------|
+| Base class inheritance | Keeps code DRY. Entity classes only contain config (table name, filename, required columns) and custom cleaning logic. The complex deduplication and insert logic lives in `BaseIngester`. |
+| Pandas for reading/cleaning | Fast CSV parsing and vectorized cleaning operations. |
+| SQLAlchemy Core `insert()` | Bypasses the ORM for bulk inserts, significantly improving performance for millions of rows. |
+| Topological sort | `loader.py` runs in this order: Customers, Sellers, Products → Orders → OrderItems, Payments, Reviews. This guarantees FK constraints are met. |
+| Database-level deduplication | Checks the live database for existing Primary Keys before inserting. Prevents unique constraint violations if the pipeline runs twice. |
+
+**Enterprise alternatives:**
+
+| Alternative | When to use |
+|-------------|-------------|
+| Airflow / Prefect | Distributed, DAG-based orchestration with retries and scheduling. |
+| dbt (data build tool) | For SQL-based transformations inside the data warehouse. |
+| AWS Glue / EMR | Serverless Spark for massive scale (Terabytes+). |
+
+---
+
+### Milestone 6 — Centralized Logging ✅
+
+**What was built:**
+
+| File | Purpose |
+|------|---------|
+| [backend/logging.py](../backend/logging.py) | Structured logging framework using `structlog`. |
+
+**Why it exists:**
+
+`print()` statements are useless in production. Standard library logging outputs unstructured prose (e.g., `INFO: User 123 logged in`), which is hard to query in tools like Datadog or ELK. Structured logging outputs machine-readable JSON (e.g., `{"event": "login", "user_id": 123, "level": "info"}`).
+
+**Why this design was chosen:**
+
+| Decision | Rationale |
+|----------|-----------|
+| `structlog` library | Industry standard for structured logging in Python. |
+| JSON in production, colored console in dev | Machines read JSON easily, humans read colored text easily. The environment dictates the renderer. |
+| `log_execution_time` context manager | Standardizes how we measure performance across the codebase without scattering `time.time()` everywhere. |
+| Stdlib integration | Routes standard library logs (like SQLAlchemy queries or Uvicorn logs) through structlog, ensuring a uniform log format for the entire application. |
+
+**Common mistakes:**
+
+| Mistake | Consequence |
+|---------|-------------|
+| Not intercepting standard library logs | Half your logs are JSON, the other half are plaintext, breaking your log aggregator. |
+| String interpolation in logs | `logger.info(f"User {user_id} logged in")` prevents log aggregators from grouping events by type. |

@@ -55,3 +55,53 @@ IEEE 754 floating-point cannot represent all decimal fractions exactly. `0.1 + 0
 - `lazy="joined"` creates a JOIN — efficient for one-to-one, but for one-to-many it produces duplicate parent rows in the result set (one per child), increasing data transfer.
 - `lazy="subquery"` loads related objects in a subquery — can be slow with complex filters.
 - `lazy="selectin"` loads related objects with `SELECT ... WHERE parent_id IN (...)` — a single flat query with no JOINs. It's the most efficient strategy for one-to-many relationships in async contexts because it avoids Cartesian products and works naturally with async sessions.
+
+---
+
+## Sprint 1 — Advanced Topics (Milestones 4, 5 & 6)
+
+### Migrations (Alembic)
+
+**Q11: Why do we need a schema migration tool like Alembic instead of just running `CREATE TABLE` scripts?**
+
+As applications evolve, database schemas must change. A migration tool tracks the exact state of the database version-by-version. This ensures that every environment (dev, staging, prod) applies changes in the exact same order, preventing inconsistencies. It also provides a programmatic way to roll back (downgrade) a bad deployment without manual DBA intervention.
+
+**Q12: Alembic's `env.py` has an "offline mode". What is this, and why do enterprises require it?**
+
+In "online mode", Alembic connects directly to the database and runs the `ALTER TABLE` statements itself. In "offline mode", Alembic generates a `.sql` script containing all the changes but does NOT execute them. Enterprises require this because DBAs or security teams often mandate reviewing and executing schema changes manually via their own secure deployment pipelines, rather than letting the application deploy them automatically.
+
+### Data Ingestion Pipeline
+
+**Q13: Why does our ingestion framework use SQLAlchemy Core `insert()` instead of `session.add()` (ORM)?**
+
+`session.add()` creates an ORM object tracking state, relationship loading, and events for every single row. For a dataset with 100,000+ rows, the memory overhead and CPU time spent instantiating objects makes it incredibly slow. `session.execute(table.insert(), list_of_dicts)` bypasses the ORM entirely, issuing a raw bulk SQL `INSERT` statement which is orders of magnitude faster.
+
+**Q14: Explain "Topological Sort" in the context of data ingestion.**
+
+Topological sort is ordering tasks so that dependencies are resolved before the task that requires them. In databases, this means inserting parent rows before child rows to satisfy Foreign Key constraints. We must ingest `customers` before `orders` because an order references a `customer_id`. Our master loader uses a topological sort to guarantee the correct ingestion order.
+
+**Q15: How does the ingestion framework handle idempotency (running the same pipeline twice)?**
+
+Idempotency means applying an operation multiple times has the same result as applying it once. Our pipeline queries the database for existing Primary Keys and removes those rows from the Pandas DataFrame before inserting. If the pipeline runs twice, the second run finds 0 new rows and completes safely, rather than crashing with a Unique Constraint Violation.
+
+**Q16: Why do we use Pandas for data cleaning before inserting into PostgreSQL?**
+
+Pandas is optimized for in-memory, vectorized operations on tabular data. Tasks like filling missing values, casting types, stripping whitespace, and dropping duplicates are done in a few lines of C-optimized code. Doing this in raw Python loops would be slow, and doing it entirely in SQL `INSERT` statements is often too complex for dirty source data.
+
+### Centralized Logging
+
+**Q17: What is "Structured Logging" and why is `print()` inadequate for production?**
+
+`print()` outputs unstructured text. Standard library logging outputs prose (e.g. `INFO: User 123 logged in`). In a production system generating millions of logs, you need to query them (e.g. "show all failed logins where user_id=123"). Structured logging outputs machine-readable key-value pairs (usually JSON). Log aggregators like ELK or Datadog can index JSON automatically, making queries instant.
+
+**Q18: Why do we render JSON in production but colored text in development?**
+
+JSON is meant for machines, not humans. Reading raw JSON logs in a terminal during local development is cognitively taxing and slows down debugging. `structlog` allows us to swap the renderer based on the environment: `ConsoleRenderer` for developers (colored, aligned text) and `JSONRenderer` for production (parsable by aggregators).
+
+**Q19: How do we prevent 3rd-party libraries (like SQLAlchemy or Uvicorn) from breaking our structured log format?**
+
+If our app outputs JSON but SQLAlchemy outputs `INFO: sqlalchemy.engine.Engine: SELECT 1`, the log aggregator fails to parse the line. We use `structlog.stdlib.ProcessorFormatter.wrap_for_formatter` to intercept all standard library logs and route them through structlog's pipeline. This forces all 3rd-party libraries to output in our exact JSON format.
+
+**Q20: What is a context-bound logger?**
+
+A context-bound logger remembers key-value pairs across multiple log calls. If you bind a `request_id` or `user_id` at the start of an operation (`logger = logger.bind(user_id=123)`), every subsequent log message using that logger automatically includes `user_id=123` without you having to pass it explicitly every time. This provides crucial trace context for debugging.
