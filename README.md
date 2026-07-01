@@ -239,6 +239,7 @@ Detailed architecture documentation is available inside the `docs/` directory.
 - LEARNING_GUIDE.md
 - SPRINT_0_NOTES.md
 - SPRINT_1_NOTES.md
+- INTERVIEW_GUIDE.md
 
 Future documentation will include:
 
@@ -248,7 +249,6 @@ Future documentation will include:
 - Agent Architecture
 - Deployment Guide
 - Security Guide
-- Interview Guide
 
 ---
 
