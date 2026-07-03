@@ -29,6 +29,10 @@ scikit-learn>=1.5,<2.0
 pandas>=2.2,<3.0
 numpy>=1.26,<2.0
 vaderSentiment>=3.3,<4.0
+xgboost>=2.0,<3.0
+lightgbm>=4.0,<5.0
+shap>=0.40,<1.0
+matplotlib>=3.8,<4.0
 
 # LLM
 openai>=1.30,<2.0

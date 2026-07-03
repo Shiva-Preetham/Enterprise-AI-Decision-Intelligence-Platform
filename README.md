@@ -219,7 +219,7 @@ npm run dev
 | Sprint 0 | ✅ Completed |
 | Sprint 1 | ✅ Database Foundation |
 | Sprint 2 | ✅ Feature Store |
-| Sprint 3 | ⏳ ML Pipeline |
+| Sprint 3 | ✅ ML Pipeline |
 | Sprint 4 | ⏳ FastAPI |
 | Sprint 5 | ⏳ Redis |
 | Sprint 6 | ⏳ RabbitMQ |
@@ -240,6 +240,7 @@ Detailed architecture documentation is available inside the `docs/` directory.
 - SPRINT_0_NOTES.md
 - SPRINT_1_NOTES.md
 - SPRINT_2_NOTES.md
+- SPRINT_3_NOTES.md
 - INTERVIEW_GUIDE.md
 
 Future documentation will include:

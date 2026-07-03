@@ -99,7 +99,22 @@ The platform uses `structlog` for structured, machine-readable logging.
 
 ## Data Flow
 
-*Placeholder — will document the end-to-end data flow from ingestion to dashboard.*
+### Machine Learning Pipeline (Sprint 3)
+```
+Feature Store (PostgreSQL)
+       │
+       ▼
+   Preprocessing (Imputers, OneHotEncoder)
+       │
+       ▼
+   Model Training (RF, XGBoost, LightGBM) ◄── Hyperparameter Tuning (RandomizedSearchCV)
+       │
+       ▼
+   Evaluation (ROC AUC, PR AUC) ──► SHAP Explainability
+       │
+       ▼
+   Model Registry (models/)
+```
 
 ---
 
@@ -111,7 +126,9 @@ The platform uses `structlog` for structured, machine-readable logging.
 | Database               | PostgreSQL     | ACID compliance, JSON support, mature ecosystem |
 | Cache                  | Redis          | Sub-ms latency, pub/sub, data structures        |
 | Message Queue          | RabbitMQ       | Reliable delivery, routing, management UI       |
-| ML Framework           | scikit-learn   | Production-proven, interpretable models         |
+| ML Framework           | scikit-learn   | Production-proven, pipelines, basic models      |
+| Boosted Trees          | XGBoost / LGBM | SOTA for tabular data, handles non-linearities  |
+| Explainability         | SHAP           | Game-theoretic feature attribution (local/global)|
 | Feature Store DB       | PostgreSQL     | Offline historical feature storage              |
 | Feature Pipelines      | Pandas         | Fast in-memory vectorized data transformation   |
 | Sentiment Analysis     | VADER          | Fast, lexicon-based NLP for short texts         |

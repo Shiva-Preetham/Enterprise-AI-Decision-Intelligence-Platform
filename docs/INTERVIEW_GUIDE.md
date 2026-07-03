@@ -128,3 +128,27 @@
 **Q25: Why separate `pipeline_version` and `feature_version` in metadata?**
 - **Feature Version**: Tracks changes to the business logic of the features (e.g., adding `max_delivery_delay`).
 - **Pipeline Version**: Tracks changes to the infrastructure or orchestration code (e.g., optimizing a Pandas merge) without changing the mathematical output of the features.
+
+---
+
+## Sprint 3 — Machine Learning Pipeline & Explainable AI
+
+**Q26: Why use ROC AUC instead of Accuracy for evaluating churn models?**
+- **Issue with Accuracy**: Churn datasets are highly imbalanced (e.g., 90% retain, 10% churn). A naive model that always predicts "retain" has 90% accuracy but 0% predictive power.
+- **ROC AUC**: Evaluates the model's ability to rank a random positive example higher than a random negative one, making it immune to class imbalance and probability thresholds.
+
+**Q27: What is the Bias-Variance Tradeoff?**
+- **Bias**: Error from erroneous assumptions in the learning algorithm (underfitting, e.g., Logistic Regression on non-linear data).
+- **Variance**: Error from sensitivity to small fluctuations in the training set (overfitting, e.g., an unpruned Decision Tree).
+- **Tradeoff**: As you increase model complexity, bias decreases but variance increases. The goal is the sweet spot minimizing total error.
+
+**Q28: Explain the difference between GridSearchCV and RandomizedSearchCV.**
+- **GridSearchCV**: Exhaustively tries every single combination in the parameter grid. Extremely slow for large spaces.
+- **RandomizedSearchCV**: Samples a fixed number of combinations randomly from the grid. Statistically proven to find near-optimal parameters in a fraction of the compute time.
+
+**Q29: Why use SHAP instead of Scikit-Learn's built-in `feature_importances_`?**
+- **`feature_importances_`**: Only provides global importance (how often a feature is used to split trees). It doesn't tell you the *direction* (did high recency cause churn, or prevent it?).
+- **SHAP**: Game-theoretic approach that provides both **global** importance and **local** explanations (e.g., predicting exactly *why* Customer X is a high churn risk).
+
+**Q30: Why do we fit the imputer and scaler only on the training set, not the whole dataset?**
+- **Data Leakage**: If you scale using the mean/variance of the entire dataset, information from the test set "leaks" into the training set, artificially inflating performance metrics and leading to disastrous real-world performance.
