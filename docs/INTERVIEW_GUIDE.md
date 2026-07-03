@@ -216,3 +216,38 @@
 
 **Q40: Why use a deterministic Rule Engine for "Next Best Action" instead of letting the LLM decide?**
 - **Control**: In an enterprise environment (especially banking or finance), you cannot have an LLM hallucinating a recommendation like "Give this customer a $10,000 refund." By using a standard Python rules engine based on the tool outputs (e.g., if Churn > 0.7 -> Offer 10% Coupon), we guarantee 100% compliance with business policies.
+
+---
+
+## Sprint 7: Decision Intelligence & Governance Layer
+
+**Q41: Why did you separate the Policy Engine from the LLM Reasoning Engine?**
+- The LLM is non-deterministic and prone to hallucination. In an enterprise environment, you cannot trust an LLM to decide if a customer gets a $5,000 refund. The Policy Engine (deterministic Python code) holds the final authority on what is *allowed*, while the LLM simply chooses the *best option* from that allowed list and provides a human-readable justification.
+
+**Q42: What happens if the LLM proposes an action that isn't allowed by the policy?**
+- The `ReasoningEngine` validates the LLM's output against the `allowed_actions` list provided by the Policy Engine. If there's a mismatch, it immediately raises a `PolicyViolationError`, the request is halted, and the violation is logged to the audit trail. This acts as a hard boundary.
+
+**Q43: How is Human-in-the-Loop (HITL) implemented in your architecture?**
+- If the Policy Engine evaluates a high-risk scenario (e.g., a massive coupon for a high-churn, high-CLV user), it returns `REQUIRE_APPROVAL`. The `WorkflowEngine` initializes the recommendation in a `PendingApproval` state. Execution is blocked until an authorized manager calls the `approve` endpoint.
+
+**Q44: Why did you use an interface-based Execution Engine instead of writing the API calls directly?**
+- By defining an abstract `ExecutorBase`, the Decision Engine doesn't care *how* a coupon is sent, only *that* it is sent. This allows us to use simulated executors for development, and later hot-swap them for real integrations (like Twilio or Salesforce) without touching the core decision logic.
+
+**Q45: How do you guarantee the system is auditable?**
+- Every single state change—from the initial policy evaluation to the LLM reasoning output to the final execution result—is appended to a `decision_history` table via the `AuditService`. It is an append-only log, ensuring we can reconstruct exactly *why* the AI took a specific action weeks later.
+
+**Q46: Why didn't you use Celery for the Execution Engine in Sprint 7?**
+- We already demonstrated asynchronous message queues (RabbitMQ/Celery) in Sprint 5 for the ML pipeline. Re-implementing it here for simulated actions would have added boilerplate without teaching a new architectural pattern. Keeping it synchronous in this sprint kept the focus strictly on the Decision Intelligence flow.
+
+**Q47: How are policy rules evaluated if multiple rules apply?**
+- We use a `PolicyRegistry` that holds an ordered list of rules. The system evaluates them sequentially; the first rule that explicitly returns a decision (`ALLOW`, `DENY`, or `REQUIRE_APPROVAL`) wins and halts the chain. This prevents conflicting policy outputs.
+
+**Q48: How would you scale the Policy Engine if business users wanted to change rules without an engineer?**
+- Currently, rules are hardcoded in Python. To scale this, I would extract the rules into a database-backed DSL (Domain Specific Language) or integrate a dedicated enterprise rule engine like Open Policy Agent (OPA) or Drools, allowing stakeholders to update thresholds via a UI.
+
+**Q49: Why did you only use 4 tables (`recommendations`, `workflows`, `executions`, `decision_history`) for this entire system?**
+- A tight schema is better than an over-engineered one. Instead of having separate tables for approvals or policy versions, we treated approvals as just another event in the `decision_history` table, and deferred policy versioning until policies are externalized. This reduces JOIN complexity while maintaining full functionality.
+
+**Q50: How do you prevent invalid state transitions in your workflow?**
+- The `WorkflowEngine` acts as a strict state machine with a `VALID_TRANSITIONS` dictionary. If a request attempts to move a workflow from `Created` directly to `Completed` (skipping execution), the engine raises an `InvalidTransitionError` and the request fails.
+

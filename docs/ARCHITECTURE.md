@@ -177,6 +177,34 @@ User Question -> FastAPI -> LangGraph (Planner Node)
 
 ---
 
+### Decision Intelligence Layer (Sprint 7)
+
+The platform enforces strict safety boundaries through a deterministic Policy Engine combined with LLM Reasoning.
+
+```text
+Prediction + Profile -> Policy Engine (Deterministic Rules) -> Allowed Actions
+                               │
+                               ▼
+                        Reasoning Engine (LLM Advisory)
+                               │
+                               ▼
+                      Workflow Engine (State Machine)
+                               │
+         (If High Risk) -> Human Approval (HITL)
+                               │
+                               ▼
+                       Execution Engine (Simulated)
+                               │
+                               ▼
+                      Audit Trail (decision_history)
+```
+
+- **LLM as Advisory**: The LLM can only select from actions authorized by the Policy Engine.
+- **Human-in-the-Loop**: High-risk actions automatically halt at `PendingApproval`.
+- **Immutable Audit**: Every transition is appended to the audit log.
+
+---
+
 ## Technology Decisions
 
 | Service | Tech Stack | Responsibility |
