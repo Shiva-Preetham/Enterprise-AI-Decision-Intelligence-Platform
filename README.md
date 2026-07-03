@@ -217,16 +217,16 @@ npm run dev
 | Sprint | Status |
 |---------|--------|
 | Sprint 0 | ✅ Completed |
-| Sprint 1 | 🔄 Database Foundation (In Progress) |
-| Sprint 2 | ⏳ ML Pipeline |
-| Sprint 3 | ⏳ FastAPI |
-| Sprint 4 | ⏳ Redis |
-| Sprint 5 | ⏳ RabbitMQ |
-| Sprint 6 | ⏳ LangGraph |
-| Sprint 7 | ⏳ RAG |
-| Sprint 8 | ⏳ React Dashboard |
-| Sprint 9 | ⏳ AWS Deployment |
-| Sprint 10 | ⏳ Monitoring & MLOps |
+| Sprint 1 | ✅ Database Foundation |
+| Sprint 2 | ✅ Feature Store |
+| Sprint 3 | ⏳ ML Pipeline |
+| Sprint 4 | ⏳ FastAPI |
+| Sprint 5 | ⏳ Redis |
+| Sprint 6 | ⏳ RabbitMQ |
+| Sprint 7 | ⏳ LangGraph |
+| Sprint 8 | ⏳ RAG |
+| Sprint 9 | ⏳ React Dashboard |
+| Sprint 10 | ⏳ AWS Deployment |
 
 ---
 
@@ -239,6 +239,7 @@ Detailed architecture documentation is available inside the `docs/` directory.
 - LEARNING_GUIDE.md
 - SPRINT_0_NOTES.md
 - SPRINT_1_NOTES.md
+- SPRINT_2_NOTES.md
 - INTERVIEW_GUIDE.md
 
 Future documentation will include:

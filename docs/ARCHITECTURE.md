@@ -48,7 +48,7 @@ Application Code
 PostgreSQL
 ├── raw        ← Sprint 1: 1:1 mirror of source CSVs (7 tables)
 ├── curated    ← Future: cleaned, deduplicated, business-ready
-├── analytics  ← Future: aggregations, feature store, ML outputs
+├── analytics  ← Sprint 2: Feature Store (`customer_feature_store`)
 └── platform   ← Future: app metadata, users, audit logs
 ```
 
@@ -112,6 +112,9 @@ The platform uses `structlog` for structured, machine-readable logging.
 | Cache                  | Redis          | Sub-ms latency, pub/sub, data structures        |
 | Message Queue          | RabbitMQ       | Reliable delivery, routing, management UI       |
 | ML Framework           | scikit-learn   | Production-proven, interpretable models         |
+| Feature Store DB       | PostgreSQL     | Offline historical feature storage              |
+| Feature Pipelines      | Pandas         | Fast in-memory vectorized data transformation   |
+| Sentiment Analysis     | VADER          | Fast, lexicon-based NLP for short texts         |
 | LLM Orchestration      | LangGraph      | Stateful agent graphs, tool calling             |
 | Frontend               | React + Vite   | Component model, fast HMR, TypeScript support   |
 | Containerization       | Docker Compose | Reproducible local dev, service orchestration   |

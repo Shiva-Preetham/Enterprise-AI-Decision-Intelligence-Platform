@@ -104,3 +104,27 @@
 **Q20: What is a context-bound logger?**
 - **Definition**: A logger instance that stores context variables (e.g. `request_id`, `user_id`).
 - **Benefit**: Once bound, every log call automatically includes these fields without needing to pass them explicitly in every function call.
+
+---
+
+## Sprint 2 — Feature Engineering & Feature Store
+
+**Q21: What is a Feature Store and why is it important in enterprise ML?**
+- **Definition**: A centralized repository to store, manage, and serve engineered features for ML models.
+- **Importance**: Prevents duplicate feature engineering across teams, ensures training and serving environments use identical feature logic (preventing training-serving skew), and provides historical point-in-time data for model training.
+
+**Q22: What is the difference between an Offline and Online Feature Store?**
+- **Offline**: Usually a data warehouse (like PostgreSQL or Snowflake) optimized for high-throughput batch reads to generate historical training datasets.
+- **Online**: Usually an in-memory database (like Redis) optimized for low-latency point reads (single-record lookups) for real-time model inference.
+
+**Q23: What is Data Leakage in Feature Engineering?**
+- **Definition**: When information from outside the training dataset (or from the future) is accidentally used to construct features.
+- **Prevention**: Strict adherence to a point-in-time `OBSERVATION_DATE` (e.g., stopping all feature aggregation at a specific date) ensures models don't "peek" into the future.
+
+**Q24: Why is Idempotency critical in data pipelines?**
+- **Definition**: Running the pipeline multiple times safely yields the same result without duplicating data or crashing.
+- **Benefit**: If a scheduled Airflow/cron job fails halfway and restarts, it won't corrupt the database with duplicate rows.
+
+**Q25: Why separate `pipeline_version` and `feature_version` in metadata?**
+- **Feature Version**: Tracks changes to the business logic of the features (e.g., adding `max_delivery_delay`).
+- **Pipeline Version**: Tracks changes to the infrastructure or orchestration code (e.g., optimizing a Pandas merge) without changing the mathematical output of the features.

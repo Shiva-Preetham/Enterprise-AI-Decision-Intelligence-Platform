@@ -22,6 +22,7 @@ from backend.models.payments import Payment
 from backend.models.products import Product
 from backend.models.reviews import Review
 from backend.models.sellers import Seller
+from backend.models.customer_feature_store import CustomerFeatureStore
 
 __all__ = [
     "Customer",
@@ -31,4 +32,5 @@ __all__ = [
     "Product",
     "Review",
     "Seller",
+    "CustomerFeatureStore",
 ]
