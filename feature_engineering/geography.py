@@ -1,4 +1,5 @@
 import pandas as pd
+# pyrefly: ignore [missing-import]
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 

@@ -223,7 +223,7 @@ npm run dev
 | Sprint 4 | ✅ FastAPI |
 | Sprint 5 | ✅ Redis, Celery & Background Workers |
 | Sprint 6 | ✅ Enterprise AI Copilot (LangGraph) |
-| Sprint 7 | ⏳ LangGraph Advanced / Workflow |
+| Sprint 7 | ✅ Decision Intelligence Layer (Policy-Governed AI) |
 | Sprint 8 | ⏳ RAG |
 | Sprint 9 | ⏳ React Dashboard |
 | Sprint 10 | ⏳ AWS Deployment |

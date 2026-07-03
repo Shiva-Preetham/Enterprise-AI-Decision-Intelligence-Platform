@@ -13,6 +13,7 @@ from backend.api.v1.models import router as models_router
 from backend.api.v1.predictions import router as predictions_router
 from backend.api.v1.tasks import router as tasks_router
 from agent.router import router as agent_router
+from backend.api.v1.decisions import router as decisions_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -23,3 +24,4 @@ api_router.include_router(analytics_router)
 api_router.include_router(models_router)
 api_router.include_router(tasks_router)
 api_router.include_router(agent_router)
+api_router.include_router(decisions_router)

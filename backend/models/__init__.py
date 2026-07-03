@@ -23,6 +23,7 @@ from backend.models.products import Product
 from backend.models.reviews import Review
 from backend.models.sellers import Seller
 from backend.models.customer_feature_store import CustomerFeatureStore
+from decision_engine.models import RecommendationModel, WorkflowModel, ExecutionModel, DecisionHistoryModel
 
 __all__ = [
     "Customer",
@@ -33,4 +34,8 @@ __all__ = [
     "Review",
     "Seller",
     "CustomerFeatureStore",
+    "RecommendationModel",
+    "WorkflowModel",
+    "ExecutionModel",
+    "DecisionHistoryModel",
 ]
