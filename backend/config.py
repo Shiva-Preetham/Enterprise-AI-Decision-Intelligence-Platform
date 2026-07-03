@@ -20,6 +20,7 @@ Design Decisions:
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import List
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -45,6 +46,7 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
     APP_LOG_LEVEL: str = "INFO"
+    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]
 
     # ---- PostgreSQL ---------------------------------------------------------
     DATABASE_HOST: str = "localhost"
@@ -56,12 +58,7 @@ class Settings(BaseSettings):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def DATABASE_URL(self) -> str:
-        """Build SQLAlchemy-compatible async database URL from parts.
-
-        Constructing from individual parts rather than storing a monolithic
-        URL string avoids duplication and ensures consistency. If any part
-        changes (e.g. DATABASE_HOST for staging), the URL updates automatically.
-        """
+        """Build SQLAlchemy-compatible async database URL from parts."""
         return (
             f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
             f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
@@ -80,12 +77,14 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = "CHANGE_ME"
+    REDIS_DB: int = 0
+    REDIS_CACHE_TTL_SECONDS: int = 300  # 5 minutes default
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def REDIS_URL(self) -> str:
         """Build Redis connection URL from parts."""
-        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     # ---- RabbitMQ -----------------------------------------------------------
     RABBITMQ_HOST: str = "localhost"
@@ -101,6 +100,19 @@ class Settings(BaseSettings):
             f"amqp://{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD}"
             f"@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}/"
         )
+
+    # ---- Celery -------------------------------------------------------------
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def CELERY_BROKER_URL(self) -> str:
+        """Celery uses RabbitMQ as its message broker."""
+        return self.RABBITMQ_URL
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def CELERY_RESULT_BACKEND(self) -> str:
+        """Celery stores task results in Redis DB 1 (separate from cache DB 0)."""
+        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/1"
 
     # ---- Security -----------------------------------------------------------
     JWT_SECRET: str = "CHANGE_ME_USE_A_LONG_RANDOM_STRING"
@@ -119,17 +131,9 @@ def get_settings() -> Settings:
 
     Uses lru_cache so the Settings object is created exactly once,
     parsed and validated on first call, then reused for the process lifetime.
-
-    In FastAPI (Sprint 3), this becomes:
-        settings = Depends(get_settings)
-
-    For direct usage:
-        from backend.config import get_settings
-        settings = get_settings()
     """
     return Settings()
 
 
 # Module-level convenience instance for simple imports.
-# Use `get_settings()` in production code that needs testability.
 settings = get_settings()

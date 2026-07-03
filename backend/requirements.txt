@@ -18,8 +18,9 @@ alembic>=1.13,<2.0
 # Cache
 redis>=5.0,<6.0
 
-# Message Queue
+# Message Queue & Background Tasks
 aio-pika>=9.0,<10.0
+celery>=5.3,<6.0
 
 # Auth
 python-jose[cryptography]>=3.3,<4.0

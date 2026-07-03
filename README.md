@@ -221,8 +221,8 @@ npm run dev
 | Sprint 2 | ✅ Feature Store |
 | Sprint 3 | ✅ ML Pipeline |
 | Sprint 4 | ✅ FastAPI |
-| Sprint 5 | ⏳ Redis |
-| Sprint 6 | ⏳ RabbitMQ |
+| Sprint 5 | ✅ Redis, Celery & Background Workers |
+| Sprint 6 | ⏳ Advanced React Frontend |
 | Sprint 7 | ⏳ LangGraph |
 | Sprint 8 | ⏳ RAG |
 | Sprint 9 | ⏳ React Dashboard |

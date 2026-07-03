@@ -3,6 +3,7 @@ Enterprise AI Customer Intelligence Platform — Application Entrypoint.
 
 Configures and creates the FastAPI application instance. Handles:
 - ML model loading on startup (once, not per-request).
+- Redis connection pool lifecycle.
 - Middleware registration (RequestID, Observability, CORS).
 - Global exception handlers.
 - API router mounting under /api/v1/.
@@ -25,6 +26,7 @@ from structlog import get_logger
 
 from backend.api.dependencies import ml_globals
 from backend.api.v1.router import api_router
+from backend.cache.client import shutdown_redis, startup_redis
 from backend.config import settings
 from backend.core.exceptions import (
     PlatformError,
@@ -39,17 +41,21 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """FastAPI lifespan: runs at startup and shutdown.
+    """FastAPI lifespan: startup and shutdown.
 
-    Startup loads all ML artifacts into the global singleton so they are
-    available for every request without re-loading from disk each time.
-    The API still starts successfully even if model files do not exist yet
-    — the health endpoint will report `ML Model Loaded: false`.
+    Startup:
+        1. Connect to Redis (cache + Celery result backend).
+        2. Load ML artifacts into the global singleton.
 
-    Shutdown logs the event for observability.
+    Shutdown:
+        1. Close Redis connection pool.
     """
     logger.info("application_startup", env=settings.APP_ENV, version="1.0.0")
 
+    # --- Redis ---
+    await startup_redis()
+
+    # --- ML Artifacts ---
     try:
         from ml.model_loader import ModelLoader
 
@@ -73,6 +79,8 @@ async def lifespan(app: FastAPI):
 
     yield
 
+    # --- Shutdown ---
+    await shutdown_redis()
     logger.info("application_shutdown")
 
 
@@ -80,7 +88,8 @@ app = FastAPI(
     title="Customer Intelligence Platform API",
     description=(
         "Enterprise-grade REST API exposing customer churn prediction, "
-        "analytics, and SHAP explainability. Powered by FastAPI + SQLAlchemy + SHAP."
+        "analytics, background task management, and SHAP explainability. "
+        "Powered by FastAPI + SQLAlchemy + Redis + Celery + SHAP."
     ),
     version="1.0.0",
     lifespan=lifespan,
@@ -90,22 +99,20 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
-# Exception Handlers — order does not matter for handlers
+# Exception Handlers
 # ---------------------------------------------------------------------------
 app.add_exception_handler(PlatformError, platform_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(Exception, global_exception_handler)
 
 # ---------------------------------------------------------------------------
-# Middleware — order IS important (outermost = last added)
-# RequestIDMiddleware must execute before ObservabilityMiddleware so the
-# request_id is bound to structlog before any logging occurs.
+# Middleware
 # ---------------------------------------------------------------------------
 app.add_middleware(ObservabilityMiddleware)
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS if hasattr(settings, "CORS_ORIGINS") else ["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],

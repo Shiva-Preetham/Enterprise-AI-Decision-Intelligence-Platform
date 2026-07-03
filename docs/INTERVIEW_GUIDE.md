@@ -171,3 +171,26 @@
 
 **Q: What is the difference between `def` and `async def` in FastAPI endpoints?**
 **A**: `async def` runs on the main event loop and is perfect for non-blocking I/O (like async database queries using asyncpg or HTTP requests). Standard `def` runs in an external threadpool. Because we use `SQLAlchemy.ext.asyncio`, our endpoints are `async def` to maximize concurrent throughput.
+
+---
+
+## Sprint 5: Enterprise Caching & Asynchronous Workers
+
+**Q31: Why did we introduce Celery and RabbitMQ into the architecture?**
+- **Issue**: Machine learning tasks (like training, generating SHAP values, or rebuilding a feature store) take minutes or hours. If executed inside a FastAPI endpoint, it blocks the HTTP worker, leading to timeouts (HTTP 504) and dropped user requests.
+- **Solution**: We implemented an asynchronous task queue. FastAPI acts as a producer, pushing a JSON message to RabbitMQ and immediately returning a `task_id`. Celery workers (consumers) pick up the message in the background.
+
+**Q32: Explain the Read-Through Caching pattern implemented in our Service Layer.**
+- **Pattern**: When a request comes in, the Service first checks Redis. If there's a "cache hit", it returns the data immediately. On a "cache miss", it queries PostgreSQL, stores the result in Redis with a Time-To-Live (TTL), and then returns the data.
+- **Benefit**: It massively reduces database load and drops API response times from ~100ms to <2ms for frequently accessed endpoints like the Dashboard.
+
+**Q33: What is "Graceful Degradation" and how is it handled in our CacheService?**
+- **Definition**: The ability of a system to continue functioning (perhaps slower) when a non-critical component fails.
+- **Implementation**: Every Redis operation in our `CacheService` is wrapped in a `try/except` block. If Redis crashes, the cache lookup simply returns `None` (a forced cache miss), allowing the application to silently fall back to the PostgreSQL database without throwing HTTP 500 errors to the user.
+
+**Q34: Why do we use RabbitMQ for Celery's broker but Redis for Celery's result backend?**
+- **Broker (RabbitMQ)**: Needs to be durable, support message acknowledgments, and handle complex routing. RabbitMQ excels at robust message delivery and queuing.
+- **Result Backend (Redis)**: Needs to be exceptionally fast at storing and retrieving short-lived key-value pairs (the task status and result payload). Redis is perfect for this high-speed, temporary storage.
+
+**Q35: Why did we configure multiple queues (`default`, `ml`, `analytics`) in Celery?**
+- **Resource Isolation**: ML training requires massive CPU/GPU resources and can take hours. If ML tasks shared the same queue as lightweight analytics updates, the analytics tasks would get "starved" waiting for ML to finish. By separating queues, we can assign lightweight servers to consume `analytics` and expensive GPU servers to consume *only* `ml` tasks.

@@ -1,10 +1,11 @@
 """
 Enterprise AI Customer Intelligence Platform — API Dependencies.
 
-Defines all FastAPI `Depends()` providers for database sessions, repositories,
-services, and the ML singleton. Centralizing these here enforces the DI pattern
-and keeps routers thin.
+Defines all FastAPI Depends() providers for database sessions, repositories,
+services, cache, and the ML singleton.
 """
+
+from __future__ import annotations
 
 from functools import lru_cache
 from typing import AsyncGenerator
@@ -12,11 +13,12 @@ from typing import AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.cache.service import CacheService
 from backend.db.session import AsyncSessionFactory
-from backend.repositories.customer_repository import CustomerRepository
 from backend.repositories.analytics_repository import AnalyticsRepository
-from backend.services.customer_service import CustomerService
+from backend.repositories.customer_repository import CustomerRepository
 from backend.services.analytics_service import AnalyticsService
+from backend.services.customer_service import CustomerService
 from backend.services.model_service import ModelService
 from backend.services.prediction_service import PredictionService
 
@@ -42,6 +44,15 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             yield session
         finally:
             await session.close()
+
+
+# ---------------------------------------------------------------------------
+# Cache
+# ---------------------------------------------------------------------------
+
+def get_cache_service() -> CacheService:
+    """Returns a CacheService instance. Stateless, safe to create per-request."""
+    return CacheService()
 
 
 # ---------------------------------------------------------------------------
@@ -83,12 +94,14 @@ def get_prediction_service() -> PredictionService:
 def get_customer_service(
     repository: CustomerRepository = Depends(get_customer_repository),
     prediction_service: PredictionService = Depends(get_prediction_service),
+    cache: CacheService = Depends(get_cache_service),
 ) -> CustomerService:
-    return CustomerService(repository, prediction_service)
+    return CustomerService(repository, prediction_service, cache)
 
 
 def get_analytics_service(
     repository: AnalyticsRepository = Depends(get_analytics_repository),
     model_service: ModelService = Depends(get_model_service),
+    cache: CacheService = Depends(get_cache_service),
 ) -> AnalyticsService:
-    return AnalyticsService(repository, model_service)
+    return AnalyticsService(repository, model_service, cache)

@@ -129,6 +129,28 @@ Feature Store (PostgreSQL)
    Model Registry (models/)
 ```
 
+### Background Processing & Caching (Sprint 5)
+
+Heavy operations are offloaded to **Celery workers** backed by **RabbitMQ**.
+
+```text
+Client -> API Endpoint -> Returns task_id immediately
+       │
+       ▼ (Publishes Message)
+RabbitMQ Broker (Queue: ml, analytics, default)
+       │
+       ▼ (Consumes Message)
+Celery Worker -> Executes Task -> Writes result to Redis (Result Backend)
+       │
+Client -> Polls GET /tasks/{task_id} -> Redis
+```
+
+**Caching Strategy**: Read-through caching is implemented at the Service Layer using Redis.
+- `CustomerService`: Caches profile data with 5-min TTL.
+- `AnalyticsService`: Caches dashboard aggregates with 1-min TTL.
+- **Graceful Degradation**: If Redis goes down, operations silently fall back to PostgreSQL.
+- **Key Design**: All cache keys are strictly versioned (e.g., `v1:customer:123`, `v1:dashboard`).
+
 ---
 
 ## Technology Decisions
