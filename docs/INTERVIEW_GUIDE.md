@@ -152,3 +152,22 @@
 
 **Q30: Why do we fit the imputer and scaler only on the training set, not the whole dataset?**
 - **Data Leakage**: If you scale using the mean/variance of the entire dataset, information from the test set "leaks" into the training set, artificially inflating performance metrics and leading to disastrous real-world performance.
+
+---
+
+## Sprint 4: Enterprise FastAPI Backend
+
+**Q: Why use the Repository Pattern instead of querying SQLAlchemy directly in your routers?**
+**A**: Decoupling. Routers should only handle HTTP concerns (parsing args, returning JSON). Services handle business logic. Repositories handle database logic. If we ever switch ORMs or databases, we only touch the Repository. It also makes mocking the database for Unit Tests incredibly easy.
+
+**Q: How do you prevent memory leaks when loading Machine Learning models in FastAPI?**
+**A**: I load the model *once* during FastAPI's `lifespan` event (startup) and cache it globally. Re-loading a 50MB pickle file for every request would crash the server and cause massive latency. We pass this cached instance into our services via Dependency Injection.
+
+**Q: Why is returning Pydantic DTOs better than returning SQLAlchemy ORM objects?**
+**A**: Returning ORM models directly to the client can cause "Lazy Loading" errors if the serializer touches an unloaded relationship outside the active async session. Pydantic DTOs create a strict boundary, ensuring we only return exactly what the API contract dictates (preventing accidental leakage of sensitive fields like passwords).
+
+**Q: What is the purpose of RequestID Middleware?**
+**A**: In a production environment with millions of requests, if an error happens, you need a way to trace it. The middleware generates a UUID (`X-Request-ID`), attaches it to the request state, binds it to `structlog`, and returns it in the header. If a customer reports an error, they can give us the ID, and we can query our logs for the exact stack trace.
+
+**Q: What is the difference between `def` and `async def` in FastAPI endpoints?**
+**A**: `async def` runs on the main event loop and is perfect for non-blocking I/O (like async database queries using asyncpg or HTTP requests). Standard `def` runs in an external threadpool. Because we use `SQLAlchemy.ext.asyncio`, our endpoints are `async def` to maximize concurrent throughput.

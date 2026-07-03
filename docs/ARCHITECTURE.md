@@ -20,6 +20,19 @@ The platform uses a centralized configuration system built on `pydantic-settings
 - **Computed URLs**: Database, Redis, and RabbitMQ URLs are derived from parts — no duplication
 - **DI-ready**: `get_settings()` factory supports dependency injection and test mocking
 
+### 3. Sprint 4: Enterprise FastAPI Backend
+The API layer adheres strictly to Clean Architecture to separate concerns.
+
+```text
+Request -> Router (HTTP) -> Service (Business Logic) -> Repository (SQLAlchemy) -> DB
+```
+
+Key features:
+- **Dependency Injection**: Passes the DB session and Singleton ML Models down the stack.
+- **Middlewares**: `RequestIDMiddleware` injects UUIDs, `ObservabilityMiddleware` handles standardized request logging.
+- **Strict DTOs**: Pydantic V2 Response models guarantee that raw ORM objects never leak to the client.
+- **Global Error Handling**: Standardized error responses to prevent stack traces from reaching end-users.er architecture:
+
 ### Database Layer (Sprint 1 — Milestones 2 & 3)
 
 The database layer follows a three-tier architecture:
@@ -120,17 +133,14 @@ Feature Store (PostgreSQL)
 
 ## Technology Decisions
 
-| Decision               | Choice         | Rationale                                      |
-|------------------------|----------------|-------------------------------------------------|
-| API Framework          | FastAPI        | Async-native, auto-docs, Pydantic integration  |
-| Database               | PostgreSQL     | ACID compliance, JSON support, mature ecosystem |
-| Cache                  | Redis          | Sub-ms latency, pub/sub, data structures        |
-| Message Queue          | RabbitMQ       | Reliable delivery, routing, management UI       |
-| ML Framework           | scikit-learn   | Production-proven, pipelines, basic models      |
-| Boosted Trees          | XGBoost / LGBM | SOTA for tabular data, handles non-linearities  |
-| Explainability         | SHAP           | Game-theoretic feature attribution (local/global)|
-| Feature Store DB       | PostgreSQL     | Offline historical feature storage              |
-| Feature Pipelines      | Pandas         | Fast in-memory vectorized data transformation   |
+| Service | Tech Stack | Responsibility |
+|---|---|---|
+| **API Backend** | FastAPI, Uvicorn | High-performance REST APIs, Model Serving, dependency injection |
+| **Database Layer**| PostgreSQL, asyncpg| High-performance ACID storage, normalized data |
+| **Ingestion**   | Pandas, SQLAlchemy | ETL pipeline to move raw data into Postgres |
+| **Feature Store**| SQL (Materialized) | Aggregated, point-in-time ML features |
+| **ML Pipeline** | Scikit-Learn, XGBoost| Training, hyperparameter tuning, evaluation |
+| **Explainability**| SHAP | Global and Local model interpretability |
 | Sentiment Analysis     | VADER          | Fast, lexicon-based NLP for short texts         |
 | LLM Orchestration      | LangGraph      | Stateful agent graphs, tool calling             |
 | Frontend               | React + Vite   | Component model, fast HMR, TypeScript support   |
