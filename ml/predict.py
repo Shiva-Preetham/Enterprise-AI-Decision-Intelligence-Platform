@@ -22,10 +22,10 @@ class Predictor:
         prob = float(self.model.predict_proba(X_transformed)[0, 1])
         label = int(self.model.predict(X_transformed)[0])
         
-        # Determine Risk Category
-        risk_category = RISK_LABELS[0]
+        # Determine Risk Category — use half-open interval [low, high)
+        risk_category = RISK_LABELS[-1]  # Default: Very High Risk
         for i in range(len(RISK_BINS) - 1):
-            if RISK_BINS[i] <= prob <= RISK_BINS[i+1]:
+            if RISK_BINS[i] <= prob < RISK_BINS[i + 1]:
                 risk_category = RISK_LABELS[i]
                 break
                 
