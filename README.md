@@ -222,8 +222,8 @@ npm run dev
 | Sprint 3 | ✅ ML Pipeline |
 | Sprint 4 | ✅ FastAPI |
 | Sprint 5 | ✅ Redis, Celery & Background Workers |
-| Sprint 6 | ⏳ Advanced React Frontend |
-| Sprint 7 | ⏳ LangGraph |
+| Sprint 6 | ✅ Enterprise AI Copilot (LangGraph) |
+| Sprint 7 | ⏳ LangGraph Advanced / Workflow |
 | Sprint 8 | ⏳ RAG |
 | Sprint 9 | ⏳ React Dashboard |
 | Sprint 10 | ⏳ AWS Deployment |

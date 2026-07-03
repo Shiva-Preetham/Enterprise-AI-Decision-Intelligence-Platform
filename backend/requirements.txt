@@ -41,6 +41,7 @@ openai>=1.30,<2.0
 langchain>=0.2,<1.0
 langchain-openai>=0.1,<1.0
 langgraph>=0.1,<1.0
+langgraph-checkpoint-redis>=0.1,<2.0
 
 # Utilities
 python-dotenv>=1.0,<2.0

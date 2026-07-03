@@ -153,6 +153,30 @@ Client -> Polls GET /tasks/{task_id} -> Redis
 
 ---
 
+### AI Copilot & Agents (Sprint 6)
+
+The platform features a LangGraph-powered AI Copilot that acts as a business analyst. 
+The AI does **not** access the database directly. Instead, it utilizes the existing Service Layer as tools.
+
+```text
+User Question -> FastAPI -> LangGraph (Planner Node)
+                               │
+                               ▼ (Tool Selection)
+                         LangChain Tools
+                               │
+                               ▼ (Dependency Injection)
+                         Service Layer
+                               │
+                               ▼
+                       Redis / PostgreSQL
+```
+
+- **Guardrails**: Intercepts requests to prevent SQL injection and prompt extraction.
+- **Structured Outputs**: Uses Pydantic to guarantee consistent JSON responses (Answer, Confidence, Recommendation).
+- **Conversational Memory**: Backed by Redis checkpointers.
+
+---
+
 ## Technology Decisions
 
 | Service | Tech Stack | Responsibility |

@@ -194,3 +194,25 @@
 
 **Q35: Why did we configure multiple queues (`default`, `ml`, `analytics`) in Celery?**
 - **Resource Isolation**: ML training requires massive CPU/GPU resources and can take hours. If ML tasks shared the same queue as lightweight analytics updates, the analytics tasks would get "starved" waiting for ML to finish. By separating queues, we can assign lightweight servers to consume `analytics` and expensive GPU servers to consume *only* `ml` tasks.
+
+---
+
+## Sprint 6: Enterprise AI Copilot & LangGraph
+
+**Q36: Why did we use LangGraph instead of a standard LangChain conversational chain?**
+- **Issue**: Standard LLM chains are linear (Prompt -> Output). If an agent needs to loop, retry failed tools, or follow complex multi-step reasoning, linear chains break down.
+- **Solution**: LangGraph allows us to model the AI as a state machine (Directed Acyclic Graph). We define specific nodes (Planner, Executor, Output Parser) with clear boundaries, making the AI highly controllable, deterministic, and easy to debug.
+
+**Q37: How does the AI Copilot access our data without causing a security risk?**
+- **Architecture**: The LLM is strictly prohibited from writing SQL or accessing the database directly (Text-to-SQL is notoriously unsafe). 
+- **Tool Calling**: We wrapped our existing, tested backend Service classes (e.g., `CustomerService`) into LangChain `@tool` decorators. The LLM simply calls these tools. If a user asks a malicious question, the worst the LLM can do is call a read-only service endpoint.
+
+**Q38: What are Guardrails and how are they implemented?**
+- **Definition**: Pre-execution filters that analyze user input before it even reaches the LLM.
+- **Implementation**: We use regex and keyword matching in `guardrails.py` to intercept SQL injection (`DROP TABLE`), code execution requests (`import os`), and prompt extraction attempts (`ignore previous instructions`). It saves money (no LLM tokens wasted on bad requests) and secures the application.
+
+**Q39: How do we guarantee the LLM returns JSON that our frontend can parse without crashing?**
+- **Solution**: We use OpenAI's Structured Outputs feature combined with Pydantic (`.with_structured_output(AgentResponse)`). The LLM is forced at the API level to strictly adhere to our JSON schema, guaranteeing fields like `answer`, `confidence`, and `recommendation` always exist.
+
+**Q40: Why use a deterministic Rule Engine for "Next Best Action" instead of letting the LLM decide?**
+- **Control**: In an enterprise environment (especially banking or finance), you cannot have an LLM hallucinating a recommendation like "Give this customer a $10,000 refund." By using a standard Python rules engine based on the tool outputs (e.g., if Churn > 0.7 -> Offer 10% Coupon), we guarantee 100% compliance with business policies.
