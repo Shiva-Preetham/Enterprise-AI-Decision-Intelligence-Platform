@@ -117,8 +117,8 @@ class Settings(BaseSettings):
     # ---- Security -----------------------------------------------------------
     JWT_SECRET: str = "CHANGE_ME_USE_A_LONG_RANDOM_STRING"
 
-    # ---- OpenAI -------------------------------------------------------------
-    OPENAI_API_KEY: str = "sk-CHANGE_ME"
+    # ---- Gemini -------------------------------------------------------------
+    GEMINI_API_KEY: str = "CHANGE_ME"
 
     # ---- Data Paths ---------------------------------------------------------
     DATA_RAW_PATH: str = "data/raw"

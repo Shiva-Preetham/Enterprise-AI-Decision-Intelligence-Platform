@@ -12,10 +12,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 
-from backend.api.dependencies import get_customer_service, get_analytics_service
+from backend.api.dependencies import get_customer_service, get_analytics_service, get_model_service
 from backend.services.customer_service import CustomerService
 from backend.services.analytics_service import AnalyticsService
-from backend.api.dependencies import ml_globals
+from backend.services.model_service import ModelService
 
 from agent.tools import inject_services
 from agent.guardrails import check_guardrails
@@ -34,7 +34,8 @@ class ChatRequest(BaseModel):
 async def chat_with_agent(
     request: ChatRequest,
     customer_svc: CustomerService = Depends(get_customer_service),
-    analytics_svc: AnalyticsService = Depends(get_analytics_service)
+    analytics_svc: AnalyticsService = Depends(get_analytics_service),
+    model_svc: ModelService = Depends(get_model_service)
 ):
     """
     Main endpoint for interacting with the Enterprise AI Copilot.
@@ -49,7 +50,7 @@ async def chat_with_agent(
     inject_services(
         customer_service=customer_svc,
         analytics_service=analytics_svc,
-        model_service=ml_globals.model_service
+        model_service=model_svc
     )
     
     # 3. Setup Memory and Config
@@ -97,5 +98,7 @@ async def chat_with_agent(
     except Exception as exc:
         import structlog
         logger = structlog.get_logger(__name__)
+        import traceback
+        error_details = traceback.format_exc()
         logger.error("agent_execution_failed", error=str(exc))
-        raise HTTPException(status_code=500, detail="Internal AI error during reasoning.")
+        raise HTTPException(status_code=500, detail=f"Internal AI error during reasoning: {error_details}")

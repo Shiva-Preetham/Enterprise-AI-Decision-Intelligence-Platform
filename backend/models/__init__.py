@@ -24,6 +24,7 @@ from backend.models.reviews import Review
 from backend.models.sellers import Seller
 from backend.models.customer_feature_store import CustomerFeatureStore
 from decision_engine.models import RecommendationModel, WorkflowModel, ExecutionModel, DecisionHistoryModel
+from mlops.models import ModelRegistryModel, ExperimentModel, DriftReportModel, AlertModel
 
 __all__ = [
     "Customer",
@@ -38,4 +39,8 @@ __all__ = [
     "WorkflowModel",
     "ExecutionModel",
     "DecisionHistoryModel",
+    "ModelRegistryModel",
+    "ExperimentModel",
+    "DriftReportModel",
+    "AlertModel",
 ]

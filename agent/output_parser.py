@@ -5,7 +5,7 @@ Node that synthesizes the final response and structures it into the Pydantic sch
 """
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from agent.state import AgentState
 from agent.models import AgentResponse
 from agent.prompts import REASONER_SYSTEM_PROMPT
@@ -15,8 +15,9 @@ async def reason_and_format_node(state: AgentState) -> dict:
     Takes the tool outputs, the recommendation from the rule engine, and the original
     question, and generates the final structured JSON response.
     """
+    from backend.config import settings
     # Force the LLM to output our Pydantic schema using structured output
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0).with_structured_output(AgentResponse)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0, google_api_key=settings.GEMINI_API_KEY).with_structured_output(AgentResponse)
     
     recommendation = state.get("recommendation", "No specific recommendation.")
     

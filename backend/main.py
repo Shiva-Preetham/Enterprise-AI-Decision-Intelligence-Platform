@@ -110,6 +110,17 @@ app.add_exception_handler(Exception, global_exception_handler)
 # ---------------------------------------------------------------------------
 app.add_middleware(ObservabilityMiddleware)
 app.add_middleware(RequestIDMiddleware)
+
+from mlops.health import router as health_router
+from mlops.metrics import router as metrics_router
+from mlops.tracing import TracingMiddleware
+from mlops.security import SecurityHeadersMiddleware, SimulatedJWTMiddleware
+
+# MLOps Middlewares
+app.add_middleware(TracingMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(SimulatedJWTMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -122,6 +133,8 @@ app.add_middleware(
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(api_router)
+app.include_router(health_router)
+app.include_router(metrics_router)
 
 if __name__ == "__main__":
     import uvicorn

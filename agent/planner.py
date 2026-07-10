@@ -5,7 +5,7 @@ Node that determines which tools to call based on the user's question.
 """
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from agent.state import AgentState
 from agent.prompts import PLANNER_SYSTEM_PROMPT
 from agent.tools import AVAILABLE_TOOLS
@@ -14,7 +14,8 @@ async def plan_node(state: AgentState) -> dict:
     """
     Analyzes the user's request and outputs a strategic plan and the tools needed.
     """
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0) # Enterprise typically prefers deterministic behavior
+    from backend.config import settings
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0, google_api_key=settings.GEMINI_API_KEY) # Enterprise typically prefers deterministic behavior
     
     # Bind the available tools to the LLM so it knows what it can do
     llm_with_tools = llm.bind_tools(AVAILABLE_TOOLS)
