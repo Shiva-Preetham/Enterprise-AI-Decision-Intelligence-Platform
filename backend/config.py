@@ -54,14 +54,19 @@ class Settings(BaseSettings):
     DATABASE_NAME: str = "customer_intelligence"
     DATABASE_USER: str = "platform_user"
     DATABASE_PASSWORD: str = "CHANGE_ME"
-    DATABASE_URL_OVERRIDE: Optional[str] = Field(None, alias="DATABASE_URL")
+    DATABASE_URL_OVERRIDE: Optional[str] = Field(None, validation_alias="DATABASE_URL")
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def DATABASE_URL(self) -> str:
         """Build SQLAlchemy-compatible async database URL from parts."""
         if self.DATABASE_URL_OVERRIDE:
-            return self.DATABASE_URL_OVERRIDE.replace("postgres://", "postgresql+asyncpg://")
+            url = self.DATABASE_URL_OVERRIDE
+            if url.startswith("postgres://"):
+                return url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgresql://"):
+                return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return url
         return (
             f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
             f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
@@ -72,7 +77,12 @@ class Settings(BaseSettings):
     def DATABASE_URL_SYNC(self) -> str:
         """Synchronous URL for Alembic migrations (asyncpg cannot be used)."""
         if self.DATABASE_URL_OVERRIDE:
-            return self.DATABASE_URL_OVERRIDE.replace("postgres://", "postgresql+psycopg2://")
+            url = self.DATABASE_URL_OVERRIDE
+            if url.startswith("postgres://"):
+                return url.replace("postgres://", "postgresql+psycopg2://", 1)
+            elif url.startswith("postgresql://"):
+                return url.replace("postgresql://", "postgresql+psycopg2://", 1)
+            return url
         return (
             f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
             f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
@@ -84,7 +94,7 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str = "CHANGE_ME"
     REDIS_DB: int = 0
     REDIS_CACHE_TTL_SECONDS: int = 300  # 5 minutes default
-    REDIS_URL_OVERRIDE: Optional[str] = Field(None, alias="REDIS_URL")
+    REDIS_URL_OVERRIDE: Optional[str] = Field(None, validation_alias="REDIS_URL")
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -110,7 +120,7 @@ class Settings(BaseSettings):
         )
 
     # ---- Celery -------------------------------------------------------------
-    CELERY_BROKER_URL_OVERRIDE: Optional[str] = Field(None, alias="CELERY_BROKER_URL")
+    CELERY_BROKER_URL_OVERRIDE: Optional[str] = Field(None, validation_alias="CELERY_BROKER_URL")
 
     @computed_field  # type: ignore[prop-decorator]
     @property
