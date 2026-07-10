@@ -21,8 +21,6 @@ const SUGGESTED_PROMPTS = [
   'Explain the current churn rate trend.',
 ];
 
-const MOCK_RESPONSES: Record<string, string> = {}; // No longer used
-
 export default function AICopilot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');

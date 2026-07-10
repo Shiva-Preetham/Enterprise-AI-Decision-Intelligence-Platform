@@ -4,7 +4,7 @@ Enterprise AI Customer Intelligence Platform — Decision Engine Schemas.
 from typing import Optional, List, Literal
 from datetime import datetime
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class PolicyDecision(BaseModel):
     decision: Literal["ALLOW", "DENY", "REQUIRE_APPROVAL"]
@@ -32,8 +32,7 @@ class RecommendationSchema(BaseModel):
     generated_by: str
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class WorkflowSchema(BaseModel):
     workflow_id: UUID
@@ -42,8 +41,7 @@ class WorkflowSchema(BaseModel):
     created_at: datetime
     updated_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AuditSchema(BaseModel):
     audit_id: UUID
@@ -53,8 +51,7 @@ class AuditSchema(BaseModel):
     details: str
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
         
 class ApprovalRequest(BaseModel):
     approver_id: str

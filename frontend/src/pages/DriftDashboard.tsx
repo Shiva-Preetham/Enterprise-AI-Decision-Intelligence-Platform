@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/common/Card';
 import { StatusBadge } from '../components/widgets/StatusBadge';
-import { Activity, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
 
 import { useDrift } from '../hooks/useApi';
@@ -18,7 +18,7 @@ export default function DriftDashboard() {
   const latestReport = driftData?.[0];
   const hasAlert = latestReport?.is_alert || false;
   
-  let psiData = [];
+  let psiData: any[] = [];
   try {
     if (latestReport?.feature_stats) {
       const stats = JSON.parse(latestReport.feature_stats);

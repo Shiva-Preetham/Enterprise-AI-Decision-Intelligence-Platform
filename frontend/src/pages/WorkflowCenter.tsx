@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../components/common/Card';
+import { Card, CardContent } from '../components/common/Card';
 import { StatusBadge } from '../components/widgets/StatusBadge';
 import { GitBranch } from 'lucide-react';
 

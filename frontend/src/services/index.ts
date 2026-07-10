@@ -88,7 +88,7 @@ export const taskService = {
 // --- Health ---
 export const healthService = {
   getHealth: () =>
-    api.get<HealthStatus>('/health/').then(r => r.data),
+    api.get<SuccessResponse<HealthStatus>>('/api/v1/health').then(r => r.data.data),
   getMetrics: () =>
     api.get('/metrics').then(r => r.data),
 };

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../components/common/Card';
+import { Card, CardContent } from '../components/common/Card';
 import { ClipboardList } from 'lucide-react';
 
 const AUDIT_EVENTS = [

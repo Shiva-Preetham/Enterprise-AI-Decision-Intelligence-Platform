@@ -20,7 +20,7 @@ export default function MLOpsDashboard() {
     return <div className="p-8 animate-pulse text-muted-foreground">Loading MLOps data...</div>;
   }
 
-  const health = healthData?.data || {};
+  const health: any = healthData || {};
   const models = modelsData || [];
 
   const subsystems = [

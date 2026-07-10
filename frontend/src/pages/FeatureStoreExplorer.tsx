@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../components/common/Card';
+import { Card, CardContent } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Database } from 'lucide-react';
 

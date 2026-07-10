@@ -222,16 +222,15 @@ export interface TaskStatus {
   duration_seconds: number | null;
 }
 
-// --- Health ---
 export interface HealthStatus {
-  status: string;
-  database: SubsystemHealth;
-  cache: SubsystemHealth;
-  timestamp: number;
-}
-
-export interface SubsystemHealth {
-  status: string;
-  latency_ms: number;
-  error?: string;
+  api_status: string;
+  database_status: string;
+  database_error: string | null;
+  ml_model_loaded: boolean;
+  application_version: string;
+  environment: string;
+  pipeline_version: string;
+  feature_version: string;
+  uptime_seconds: number;
+  timestamp: string;
 }

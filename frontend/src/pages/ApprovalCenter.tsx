@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/common/Card';
+import { Card, CardContent } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { StatusBadge } from '../components/widgets/StatusBadge';
 import { ShieldCheck, Check, X } from 'lucide-react';

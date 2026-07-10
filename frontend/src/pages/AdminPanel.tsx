@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
-import { Button } from '../components/common/Button';
-import { Settings, Users, Shield, Flag, Server } from 'lucide-react';
+import { Users, Shield, Flag } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const USERS_DATA = [
