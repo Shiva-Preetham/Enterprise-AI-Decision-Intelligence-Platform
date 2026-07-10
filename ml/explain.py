@@ -24,7 +24,7 @@ class SHAPExplainer:
         X_df = pd.DataFrame(X_sample, columns=self.feature_names)
         
         # TreeExplainer works for RF, XGB, LGBM
-        if hasattr(self.model, "tree_"): # basic check, but shap usually infers
+        if type(self.model).__name__ in ("RandomForestClassifier", "XGBClassifier", "LGBMClassifier"):
             self.explainer = shap.TreeExplainer(self.model)
         else:
             self.explainer = shap.Explainer(self.model, X_df)

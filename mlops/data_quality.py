@@ -37,11 +37,10 @@ class DataQualityChecker:
         df = pd.DataFrame([{
             "customer_unique_id": r.customer_unique_id,
             "total_lifetime_value": r.total_lifetime_value,
-            "average_order_value": r.average_order_value,
-            "purchase_count": r.purchase_count,
-            "days_since_last_purchase": r.days_since_last_purchase,
-            "review_score_mean": r.review_score_mean,
-            "freight_value_sum": r.freight_value_sum
+            "avg_order_value": r.avg_order_value,
+            "total_orders": r.total_orders,
+            "days_since_last_order": r.days_since_last_order,
+            "avg_review_score": r.avg_review_score
         } for r in records])
         
         total_rows = len(df)
@@ -55,10 +54,10 @@ class DataQualityChecker:
         # Out-of-range features (reuse range logic conceptually)
         # e.g., purchase_count cannot be negative, review_score must be 1-5
         out_of_range = []
-        if (df['purchase_count'] < 0).any():
-            out_of_range.append("purchase_count")
-        if (df['review_score_mean'] < 1).any() or (df['review_score_mean'] > 5).any():
-            out_of_range.append("review_score_mean")
+        if (df['total_orders'] < 0).any():
+            out_of_range.append("total_orders")
+        if (df['avg_review_score'] < 1).any() or (df['avg_review_score'] > 5).any():
+            out_of_range.append("avg_review_score")
             
         status = "healthy"
         if duplicates > 0 or len(out_of_range) > 0 or any(v > 0.1 for v in missing_rates.values()):

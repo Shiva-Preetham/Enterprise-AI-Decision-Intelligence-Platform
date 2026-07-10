@@ -12,11 +12,10 @@ async def test_data_quality_missing_values():
         def __init__(self, id, val):
             self.customer_unique_id = id
             self.total_lifetime_value = val
-            self.average_order_value = val
-            self.purchase_count = 1
-            self.days_since_last_purchase = 10
-            self.review_score_mean = 4.0
-            self.freight_value_sum = 10.0
+            self.avg_order_value = val
+            self.total_orders = 1
+            self.days_since_last_order = 10
+            self.avg_review_score = 4.0
             
     records = [
         MockRecord("1", 100.0),

@@ -70,21 +70,14 @@ async def chat_with_agent(
     }
     
     try:
-        # Get memory saver
+        from agent.graph import workflow
+        
+        # Compile graph with memory saver if available
         checkpointer = get_memory_saver()
-        # Note: LangGraph compilation must include checkpointer if we want to save state
-        # For simplicity in this sprint, we'll invoke the graph. If checkpointer is configured
-        # at compile time in graph.py, it will use it. (We'll assume graph.py compiles without it
-        # for testing if Redis fails, or we can compile it on the fly).
-        if checkpointer:
-            compiled_app = agent_app # In a full production setup we'd recompile or compile once with checkpointer
-            # Actually, `app = workflow.compile(checkpointer=checkpointer)` is standard.
-            # We'll just run it. (Checkpointer requires `with` block in modern LangGraph, or we pass it).
-            # We'll stick to a stateless execution if checkpointer is complex, or rely on the graph execution.
-            pass
+        compiled_app = workflow.compile(checkpointer=checkpointer) if checkpointer else workflow.compile()
             
         # Run graph
-        final_state = await agent_app.ainvoke(input_state, config=config)
+        final_state = await compiled_app.ainvoke(input_state, config=config)
         
         # Output Parser dumped the Pydantic JSON into the 'plan' key (as a hack) 
         # or we can just parse it directly.

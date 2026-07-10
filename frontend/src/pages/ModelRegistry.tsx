@@ -19,8 +19,8 @@ export default function ModelRegistry() {
     try {
       const metrics = JSON.parse(m.metrics || '{}');
       accuracy = (metrics.accuracy || 0) * 100;
-      f1 = (metrics.f1 || 0) * 100;
-      auc = (metrics.auc || 0) * 100;
+      f1 = (metrics.f1_score || 0) * 100;
+      auc = (metrics.roc_auc || 0) * 100;
     } catch (e) {
       console.error("Failed to parse metrics", e);
     }

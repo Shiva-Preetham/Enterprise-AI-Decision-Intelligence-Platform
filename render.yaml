@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: customer-intelligence-api
+    env: python
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
+    startCommand: "bash start.sh"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: customer-intelligence-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: customer-intelligence-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: customer-intelligence-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: redis
+    name: customer-intelligence-redis
+    ipAllowList: []
+    plan: free
+
+databases:
+  - name: customer-intelligence-db
+    databaseName: customer_intelligence
+    user: platform_user
+    plan: free

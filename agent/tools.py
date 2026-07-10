@@ -8,16 +8,18 @@ These tools are injected with the required Service instances at runtime.
 from typing import Dict, Any, Optional
 from langchain_core.tools import tool
 import json
+import contextvars
 
-# Global reference to backend services (injected by the router)
-_services: Dict[str, Any] = {}
+# Thread-safe reference to backend services (injected by the router per request)
+_services_ctx: contextvars.ContextVar[dict] = contextvars.ContextVar("agent_services", default={})
 
 def inject_services(customer_service, analytics_service, model_service):
-    """Sets the global service references used by the tools."""
-    global _services
-    _services["customer"] = customer_service
-    _services["analytics"] = analytics_service
-    _services["model"] = model_service
+    """Sets the context-local service references used by the tools."""
+    _services_ctx.set({
+        "customer": customer_service,
+        "analytics": analytics_service,
+        "model": model_service
+    })
 
 @tool
 async def get_customer_profile(customer_id: str) -> str:
@@ -26,7 +28,7 @@ async def get_customer_profile(customer_id: str) -> str:
     engineered Feature Store metrics, and live ML churn predictions.
     Use this when asked about a specific customer's details or risk.
     """
-    svc = _services.get("customer")
+    svc = _services_ctx.get().get("customer")
     if not svc:
         return json.dumps({"error": "Customer service not available."})
     try:
@@ -41,7 +43,7 @@ async def get_customer_timeline(customer_id: str) -> str:
     Retrieves chronological events (recent orders, recent reviews) for a specific customer.
     Use this to understand a customer's recent interaction history.
     """
-    svc = _services.get("customer")
+    svc = _services_ctx.get().get("customer")
     if not svc:
         return json.dumps({"error": "Customer service not available."})
     try:
@@ -57,7 +59,7 @@ async def get_dashboard_metrics() -> str:
     average CLV, average churn probability, and average order value.
     Use this for high-level business reporting.
     """
-    svc = _services.get("analytics")
+    svc = _services_ctx.get().get("analytics")
     if not svc:
         return json.dumps({"error": "Analytics service not available."})
     try:
@@ -73,7 +75,7 @@ async def get_model_metadata() -> str:
     including Algorithm, Training Date, ROC AUC, F1 Score, and Pipeline Versions.
     Use this when asked about ML performance or versions.
     """
-    svc = _services.get("model")
+    svc = _services_ctx.get().get("model")
     if not svc:
         return json.dumps({"error": "Model service not available."})
     try:

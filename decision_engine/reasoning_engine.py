@@ -9,6 +9,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from .schemas import ReasoningOutput, PolicyDecision
 from .prompts import REASONING_SYSTEM_PROMPT
 from .exceptions import PolicyViolationError
+from backend.config import settings
 
 class ReasoningEngine:
     """
@@ -17,7 +18,7 @@ class ReasoningEngine:
     
     def __init__(self):
         # We use strict structured outputs to ensure type safety
-        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0).with_structured_output(ReasoningOutput)
+        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0, api_key=settings.OPENAI_API_KEY).with_structured_output(ReasoningOutput)
 
     async def generate_reasoning(self, context: Dict[str, Any], policy_decision: PolicyDecision) -> ReasoningOutput:
         """

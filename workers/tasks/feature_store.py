@@ -40,9 +40,8 @@ def rebuild_feature_store(self) -> dict:
     try:
         self.update_state(state="PROGRESS", meta={"step": "Building features"})
 
-        from feature_engineering.builder import FeatureBuilder
-        builder = FeatureBuilder()
-        builder.run()
+        from feature_engineering.builder import build_feature_store
+        build_feature_store()
 
         # Invalidate caches that depend on feature store data
         self.update_state(state="PROGRESS", meta={"step": "Invalidating caches"})

@@ -39,7 +39,7 @@ class ModelTrainer:
         self.models = {
             "LogisticRegression": LogisticRegression(random_state=RANDOM_STATE, max_iter=1000),
             "RandomForest": RandomForestClassifier(random_state=RANDOM_STATE),
-            "XGBoost": XGBClassifier(random_state=RANDOM_STATE, use_label_encoder=False, eval_metric="logloss"),
+            "XGBoost": XGBClassifier(random_state=RANDOM_STATE, eval_metric="logloss"),
             "LightGBM": LGBMClassifier(random_state=RANDOM_STATE)
         }
         self.trained_models = {}

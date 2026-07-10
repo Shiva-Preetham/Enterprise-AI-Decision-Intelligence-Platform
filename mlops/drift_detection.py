@@ -55,16 +55,16 @@ class DriftDetector:
         
         # If no records, simulate some for testing
         if not records:
-            features = ['total_lifetime_value', 'purchase_count']
+            features = ['total_lifetime_value', 'total_orders']
             reference_df = pd.DataFrame(np.random.randn(100, 2), columns=features)
-            current_df = pd.DataFrame(np.random.randn(100, 2) + 0.5, columns=features) # Injected drift
+            current_df = pd.DataFrame(np.random.randn(100, 2) + 1.5, columns=features) # Injected drift
         else:
             # We would normally join with Orders to split by time, but for the feature store
             # we just split the dataset artificially 50/50 for demonstration
             df = pd.DataFrame([{
                 "total_lifetime_value": r.total_lifetime_value,
-                "average_order_value": r.average_order_value,
-                "purchase_count": r.purchase_count,
+                "avg_order_value": r.avg_order_value,
+                "total_orders": r.total_orders,
             } for r in records])
             mid = len(df) // 2
             reference_df = df.iloc[:mid]

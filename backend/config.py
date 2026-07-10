@@ -20,9 +20,9 @@ Design Decisions:
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import List
+from typing import List, Optional
 
-from pydantic import computed_field
+from pydantic import computed_field, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -54,11 +54,14 @@ class Settings(BaseSettings):
     DATABASE_NAME: str = "customer_intelligence"
     DATABASE_USER: str = "platform_user"
     DATABASE_PASSWORD: str = "CHANGE_ME"
+    DATABASE_URL_OVERRIDE: Optional[str] = Field(None, alias="DATABASE_URL")
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def DATABASE_URL(self) -> str:
         """Build SQLAlchemy-compatible async database URL from parts."""
+        if self.DATABASE_URL_OVERRIDE:
+            return self.DATABASE_URL_OVERRIDE.replace("postgres://", "postgresql+asyncpg://")
         return (
             f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
             f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
@@ -68,6 +71,8 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL_SYNC(self) -> str:
         """Synchronous URL for Alembic migrations (asyncpg cannot be used)."""
+        if self.DATABASE_URL_OVERRIDE:
+            return self.DATABASE_URL_OVERRIDE.replace("postgres://", "postgresql+psycopg2://")
         return (
             f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
             f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
@@ -79,11 +84,14 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str = "CHANGE_ME"
     REDIS_DB: int = 0
     REDIS_CACHE_TTL_SECONDS: int = 300  # 5 minutes default
+    REDIS_URL_OVERRIDE: Optional[str] = Field(None, alias="REDIS_URL")
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def REDIS_URL(self) -> str:
         """Build Redis connection URL from parts."""
+        if self.REDIS_URL_OVERRIDE:
+            return self.REDIS_URL_OVERRIDE
         return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     # ---- RabbitMQ -----------------------------------------------------------
@@ -102,10 +110,14 @@ class Settings(BaseSettings):
         )
 
     # ---- Celery -------------------------------------------------------------
+    CELERY_BROKER_URL_OVERRIDE: Optional[str] = Field(None, alias="CELERY_BROKER_URL")
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def CELERY_BROKER_URL(self) -> str:
         """Celery uses RabbitMQ as its message broker."""
+        if self.CELERY_BROKER_URL_OVERRIDE:
+            return self.CELERY_BROKER_URL_OVERRIDE
         return self.RABBITMQ_URL
 
     @computed_field  # type: ignore[prop-decorator]
@@ -117,8 +129,9 @@ class Settings(BaseSettings):
     # ---- Security -----------------------------------------------------------
     JWT_SECRET: str = "CHANGE_ME_USE_A_LONG_RANDOM_STRING"
 
-    # ---- Gemini -------------------------------------------------------------
+    # ---- Gemini & OpenAI ----------------------------------------------------
     GEMINI_API_KEY: str = "CHANGE_ME"
+    OPENAI_API_KEY: str = "CHANGE_ME"
 
     # ---- Data Paths ---------------------------------------------------------
     DATA_RAW_PATH: str = "data/raw"

@@ -38,9 +38,9 @@ async def test_drift_detection_flags_injected_drift():
     import json
     stats = json.loads(created_report.feature_stats)
     
-    # 'purchase_count' had a mean shift of +0.5 injected
+    # 'total_orders' had a mean shift of +0.5 injected
     psi_stable = stats['total_lifetime_value']['psi']
-    psi_drifted = stats['purchase_count']['psi']
+    psi_drifted = stats['total_orders']['psi']
     
     # Assert it correctly flags the injected-drift feature
     assert psi_drifted > mlops_config.PSI_THRESHOLD

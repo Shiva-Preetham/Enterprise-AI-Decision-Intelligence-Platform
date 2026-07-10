@@ -67,3 +67,8 @@ class ModelLoader:
     def is_loaded(self) -> bool:
         """Returns True if the model has been successfully loaded."""
         return self.model is not None
+
+    @classmethod
+    def load_artifacts(cls):
+        loader = cls()
+        return loader.model, loader.preprocessor, loader.feature_names

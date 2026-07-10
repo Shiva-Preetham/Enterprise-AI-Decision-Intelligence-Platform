@@ -8,7 +8,8 @@ from ml.predict import Predictor
 def mock_predictor():
     with patch("ml.predict.ModelLoader.load_artifacts") as mock_loader:
         mock_model = MagicMock()
-        mock_model.predict_proba.return_value = [[0.1, 0.9]] # High probability of class 1
+        import numpy as np
+        mock_model.predict_proba.return_value = np.array([[0.1, 0.9]]) # High probability of class 1
         mock_model.predict.return_value = [1]
         
         mock_preprocessor = MagicMock()
