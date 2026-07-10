@@ -1,0 +1,2 @@
+Best Model: LogisticRegression
+ROC AUC: 0.4000

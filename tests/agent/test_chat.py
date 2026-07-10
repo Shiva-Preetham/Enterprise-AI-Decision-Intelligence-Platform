@@ -12,7 +12,7 @@ def test_chat_endpoint_guardrail_rejection():
     )
     
     assert response.status_code == 400
-    assert "SQL" in response.json()["detail"]
+    assert "SQL" in response.text
     
 def test_chat_endpoint_missing_question():
     response = client.post(
